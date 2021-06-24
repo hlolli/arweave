@@ -13,3 +13,6 @@ data_test_slave
 erl_crash.dump
 tags
 metrics
+
+# nix
+result
