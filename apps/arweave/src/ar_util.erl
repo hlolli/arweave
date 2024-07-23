@@ -90,18 +90,23 @@ timestamp_to_seconds({MegaSecs, Secs, _MicroSecs}) ->
 %% @doc Parse a string representing a remote host into our internal format.
 parse_peer("") -> throw(empty_peer_string);
 parse_peer(BitStr) when is_bitstring(BitStr) ->
-	parse_peer(bitstring_to_list(BitStr));
+    parse_peer(bitstring_to_list(BitStr));
 parse_peer(Str) when is_list(Str) ->
     [Addr, PortStr] = parse_port_split(Str),
-    case inet:getaddr(Addr, inet) of
-		{ok, {A, B, C, D}} ->
-			{A, B, C, D, parse_port(PortStr)};
-		{error, Reason} ->
-			throw({invalid_peer_string, Str, Reason})
-	end;
+    case inet:getaddrs(Addr, inet) of
+        {ok, Addresses} ->
+            ParsedPort = parse_port(PortStr),
+            [format_address(Address, ParsedPort) || {inet, IPs} <- Addresses, Address <- IPs];
+        {error, Reason} ->
+            throw({invalid_peer_string, Str, Reason})
+    end;
 parse_peer({IP, Port}) ->
-	{A, B, C, D} = parse_peer(IP),
-	{A, B, C, D, parse_port(Port)}.
+    ParsedIPs = parse_peer(IP),
+    [{A, B, C, D, parse_port(Port)} || {A, B, C, D} <- ParsedIPs].
+
+format_address({A, B, C, D}, Port) ->
+    {A, B, C, D, Port}.
+
 
 peer_to_str(Bin) when is_binary(Bin) ->
 	binary_to_list(Bin);

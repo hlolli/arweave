@@ -1099,7 +1099,7 @@ get_info(Peer) ->
 			timeout => 2 * 1000
 		})
 	of
-		{ok, {{<<"200">>, _}, _, JSON, _, _}} -> 
+		{ok, {{<<"200">>, _}, _, JSON, _, _}} ->
 			case ar_serialize:json_decode(JSON, [return_maps]) of
 				{ok, JsonMap} ->
 					JsonMap;
@@ -1123,7 +1123,10 @@ get_peers(Peer) ->
 					timeout => 2 * 1000
 				}),
 			PeerArray = ar_serialize:dejsonify(Body),
-			lists:map(fun ar_util:parse_peer/1, PeerArray)
+			io:format("PeerArray: ~p~n", [PeerArray]),
+			Peerz = lists:flatten(lists:map(fun ar_util:parse_peer/1, PeerArray)),
+			io:format("Peerz: ~p~n", [Peerz]),
+			Peerz
 		end
 	catch _:_ -> unavailable
 	end.
